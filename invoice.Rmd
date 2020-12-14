@@ -1,0 +1,17 @@
+---
+title: "Majestic Data Solutions LLC Invoice "
+author: "Matt Majestic"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(DT)
+```
+
+```{r invoice_dt, echo=FALSE}
+DT::datatable(cars)
+```
+
