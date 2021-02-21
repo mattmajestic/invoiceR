@@ -63,6 +63,6 @@ paste0("Account #: ",params$account_number,"Routing # ",params$routing)
 ```
 
 ```{r invoice_dt, echo=FALSE,comment=NA}
-knitr::kable(params$invoice_df %>% dplyr::mutate(Total = Hours * params$rate), format = "latex", booktabs = T)
+knitr::kable(params$invoice_df %>% dplyr::mutate(Total = paste0("$ ",Hours * params$rate)), format = "latex", booktabs = T)
 ```
 

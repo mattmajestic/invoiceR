@@ -7,7 +7,7 @@ server <- function(input, output,session) {
       dplyr::filter(Time_Period == input$time_period) %>%
       dplyr::select(Days) %>%
       as.numeric()
-    updateDateRangeInput(session,"dates",start = Sys.Date() - rv$invoice_range,end = Sys.Date() + rv$invoice_range)
+    updateDateRangeInput(session,"dates",start = Sys.Date() - rv$invoice_range,end = Sys.Date())
   })
   
   output$days <- renderText({
@@ -16,9 +16,6 @@ server <- function(input, output,session) {
   output$address <- renderText({
     paste('Address: ',input$address, sep = ', ')
   })
-  output$salary <- renderText({
-    paste0('Salary: ',input$salary)
-  })
   
   rTable_content <- reactive(
     {
@@ -26,7 +23,8 @@ server <- function(input, output,session) {
           dplyr::filter(Time_Period == input$time_period) %>%
           dplyr::select(Days) %>%
           as.numeric()
-        DF <- data.frame("Date" = seq.Date(from = Sys.Date() - time_num,to = Sys.Date() + time_num,by = "days"),
+
+        DF <- data.frame("Date" = seq.Date(from = Sys.Date() - time_num,to = Sys.Date() ,by = "days"),
                          "Hours" = 0)
       
       # Try to keep previously entered custom value for match Type's

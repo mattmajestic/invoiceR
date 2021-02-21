@@ -9,9 +9,9 @@ ui <- fluidPage(
         textInput("account","Your Account Number",placeholder = "Left part of check"),
         textInput("routing","Your Routing Number",placeholder = "Right part of check")
       ),
-      dateRangeInput("dates","Date Range",start = Sys.Date() - 30,end = Sys.Date() + 30),
+      #dateRangeInput("dates","Date Range",start = Sys.Date() - 30,end = Sys.Date() + 30),
       numericInput("rate","Hourly Rate",value = 50,min = 1,max = 1000),
-      radioButtons("time_period","Time Period",choices = c("Bi-Weekly","Month","Quarter")),
+      radioButtons("time_period","Time Period",choices = c("Bi-Weekly")),
       downloadButton("report", "Generate invoice")
     ),
     mainPanel(
