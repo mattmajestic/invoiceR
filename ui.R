@@ -2,18 +2,20 @@ ui <- fluidPage(
   titlePanel('Invoice Generator'),
   sidebarLayout(
     sidebarPanel(
-      selectInput(inputId = 'name',label = 'Name: ',choices = "Matthew Majestic"),
-      dateInput(inputId = 'start_date','Start Date: '),
-      dateInput('end_date','End Date: '),
-      numericInput('skip_days','No. of Skip Days: ',value = 0,min = 0,max = 10000),
-      numericInput('bonus','Bonus: ',value = 0,min = 0,max = 100000),
-      dateInput('inv_date','Invoice Date: '),
-      "Number of days counted: ", 
+      fluidRow(
+        textInput("name","Your Business",placeholder = "LLC, Inc, Etc")
+      ),
+      fluidRow(
+        textInput("account","Your Account Number",placeholder = "Left part of check"),
+        textInput("routing","Your Routing Number",placeholder = "Right part of check")
+      ),
+      dateRangeInput("dates","Date Range",start = Sys.Date() - 30,end = Sys.Date() + 30),
+      numericInput("rate","Hourly Rate",value = 50,min = 1,max = 1000),
+      radioButtons("time_period","Time Period",choices = c("Bi-Weekly","Month","Quarter")),
       downloadButton("report", "Generate invoice")
     ),
     mainPanel(
-      textOutput("days"),
-      textOutput('address'),
-      textOutput('salary'),
-      imageOutput('sign')
+      rHandsontableOutput("invoice_table"),
+      br(),
+      textOutput("total")
     )))

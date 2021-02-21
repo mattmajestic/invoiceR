@@ -1,17 +1,68 @@
 ---
-title: "Majestic Data Solutions LLC Invoice "
-author: "Matt Majestic"
+title: "invoiceR for Easy Invoicing"
+author: "Matt Data Solutions"
+header-includes:
+   - \usepackage{booktabs}
 output:
   pdf_document: default
   html_document: default
+params:
+  name: NA
+  start_date : NA
+  end_date: NA
+  rate: NA
+  date: NA
+  invoice_df: NA
+  account: NA
+  routing: NA
+always_allow_html: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+default_output_hook <- knitr::knit_hooks$get("output")
+
+# Output hooks handle normal R console output.
+knitr::knit_hooks$set( output = function(x, options) {
+
+  comment <- knitr::opts_current$get("comment")
+  if( is.na(comment) ) comment <- ""
+  can_null <- grepl( paste0( comment, "\\s*\\[\\d?\\]" ),
+                     x, perl = TRUE)
+  do_null <- isTRUE( knitr::opts_current$get("null_prefix") )
+  if( can_null && do_null ) {
+    # By default R print output aligns at the right brace.
+    align_index <- regexpr( "\\]", x )[1] - 1
+    # Two cases: start or newline
+    re <- paste0( "^.{", align_index, "}\\]")
+    rep <- comment
+    x <- gsub( re, rep,  x )
+    re <- paste0( "\\\n.{", align_index, "}\\]")
+    rep <- paste0( "\n", comment )
+    x <- gsub( re, rep,  x )
+  }
+
+  default_output_hook( x, options )
+
+})
+
+knitr::opts_template$set("kill_prefix"=list(comment=NA, null_prefix=TRUE))
 library(DT)
 ```
 
-```{r invoice_dt, echo=FALSE}
-DT::datatable(cars)
+Company Name
+```{r name, echo=FALSE,comment=NA}
+params$name
+```
+Invoice Total
+```{r total, echo=FALSE,comment=NA}
+sum(params$invoice_df$Hours) * params$rate
+```
+Account & Routing Numbers
+```{r company, echo=FALSE,comment=NA}
+paste0("Account #: ",params$account_number,"Routing # ",params$routing)
+```
+
+```{r invoice_dt, echo=FALSE,comment=NA}
+knitr::kable(params$invoice_df %>% dplyr::mutate(Total = Hours * params$rate), format = "latex", booktabs = T)
 ```
 

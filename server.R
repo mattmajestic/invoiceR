@@ -1,24 +1,53 @@
-server = function(input, output) {
-  output$days <- renderText(
-    {
+server <- function(input, output,session) {
+  
+  rv <- reactiveValues()
+  
+  observeEvent(input$time_period,{
+    rv$invoice_range <- time_period_df %>%
+      dplyr::filter(Time_Period == input$time_period) %>%
+      dplyr::select(Days) %>%
+      as.numeric()
+    updateDateRangeInput(session,"dates",start = Sys.Date() - rv$invoice_range,end = Sys.Date() + rv$invoice_range)
+  })
+  
+  output$days <- renderText({
       paste0('Contract Length: ',  input$end_date - input$start_date + 1 - input$skip_days," days")
-    }
-  )
+    })
   output$address <- renderText({
-    line <- details %>%
-      filter(name == input$name)
-    
-    paste('Address: ',line$addr_l1,line$addr_l2,line$addr_l3, sep = ', ')
+    paste('Address: ',input$address, sep = ', ')
   })
   output$salary <- renderText({
-    line <- details %>%
-      filter(name == input$name)
-    
-    paste0('Salary: ',line$salary)
+    paste0('Salary: ',input$salary)
   })
-  output$sign <- renderImage({
-    list(src = paste0(path,"\\",input$name,'.png'), width = 250, height = 150)
-  },deleteFile = FALSE)
+  
+  rTable_content <- reactive(
+    {
+        time_num <- time_period_df %>%
+          dplyr::filter(Time_Period == input$time_period) %>%
+          dplyr::select(Days) %>%
+          as.numeric()
+        DF <- data.frame("Date" = seq.Date(from = Sys.Date() - time_num,to = Sys.Date() + time_num,by = "days"),
+                         "Hours" = 0)
+      
+      # Try to keep previously entered custom value for match Type's
+      if (length(input$invoice_table) > 0){
+        oDF <- hot_to_r(input$invoice_table)
+        DF$Hours <- oDF$Hours
+      }
+      
+      DF
+    }
+  )
+
+  output$invoice_table <- renderRHandsontable({
+
+    rhandsontable(rTable_content(),rowHeaders = FALSE)
+  })
+  
+  output$total <- renderText({
+    paste0("total: ",sum(rTable_content()$Hours) * input$rate)
+  })
+  
   output$report <- downloadHandler(
     # For PDF output, change this to "report.pdf"
     filename = "invoice.pdf",
@@ -26,8 +55,7 @@ server = function(input, output) {
       # Copy the report file to a temporary directory before processing it, in
       # case we don't have write permissions to the current working dir (which
       # can happen when deployed).
-      tdir <- path 
-      tempReport <- file.path(tdir, "inv_md.Rmd")
+      tempReport <- file.path(tempdir(), "invoice.Rmd")
       file.copy("invoice.Rmd", tempReport, overwrite = TRUE)
       
       # file.copy("details.csv",tdir)
@@ -36,10 +64,11 @@ server = function(input, output) {
       params <- list(name = input$name,
                      start_date = input$start_date,
                      end_date = input$end_date,
-                     date = input$inv_date,
-                     skip_days = input$skip_days,
-                     bonus = input$bonus,
-                     details_file = details_file)
+                     date = Sys.Date(),
+                     rate = input$rate,
+                     invoice_df = rTable_content(),
+                     account = input$account,
+                     routing = input$routing)
       
       # Knit the document, passing in the `params` list, and eval it in a
       # child of the global environment (this isolates the code in the document
@@ -50,4 +79,5 @@ server = function(input, output) {
       )
     }
   )
+  
 }
