@@ -59,7 +59,7 @@ sum(params$invoice_df$Hours) * params$rate
 ```
 Account & Routing Numbers
 ```{r company, echo=FALSE,comment=NA}
-paste0("Account #: ",params$account_number,"Routing # ",params$routing)
+paste0("Account #: ",params$account,"Routing # ",params$routing)
 ```
 
 ```{r invoice_dt, echo=FALSE,comment=NA}
